@@ -2,8 +2,10 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/olekukonko/tablewriter"
+	"github.com/urfave/cli"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -11,22 +13,93 @@ import (
 )
 
 func main() {
-	//resp, err := FetchTrendingRepositories("kotlin", "daily")
-	//if err != nil {
-	//	fmt.Println("error: " + err.Error())
-	//
-	//	return
-	//}
-	//
-	//ShowTable(resp)
+	lang := ""
+	period := "daily"
 
-	//resp, err := FetchTrendingDevelopers("go", "daily")
-	//if err != nil {
-	//	fmt.Println("error: " + err.Error())
-	//	return
-	//}
-	//
-	//ShowTableOfDevelopers(resp)
+	flags := []cli.Flag{
+		cli.StringFlag{
+			Name:     "lang,l",
+			Usage:    "language, use list command to see all the available options",
+			Required: false,
+		},
+		cli.StringFlag{
+			Name:     "period,p",
+			Usage:    "Period, possible values: daily, weekly and monthly",
+			Required: false,
+		},
+	}
+
+	app := cli.NewApp()
+	app.Name = "Wukong" // Incredible name!
+	app.Usage = "A command-line tool for browsing GitHub trending repositories&developers written by Go."
+	app.Version = "0.1.0-alpha01"
+	app.HideVersion = true
+	app.Copyright = "Wukong is under an MIT license. See the [LICENSE](https://github.com/TonnyL/Wukong/blob/master/LICENSE) for more information."
+	app.Commands = []cli.Command{
+		{
+			Name:        "repo",
+			Aliases:     []string{"r", "repositories", "repository"},
+			Description: "See the developers that the GitHub community is most excited about.",
+			Usage:       "--lang x --period y",
+			Flags:       flags,
+			Action: func(c *cli.Context) error {
+				paramsErr := CheckParams(lang, period)
+				if paramsErr != nil {
+					return paramsErr
+				}
+
+				repos, err := FetchTrendingRepositories(lang, period)
+				if err != nil {
+					return err
+				}
+
+				ShowTableOfRepositories(repos)
+
+				return nil
+			},
+		},
+		{
+			Name:        "dev",
+			Aliases:     []string{"d", "developers", "developer"},
+			Description: "See the repositories that the GitHub community is most excited about.",
+			Usage:       "--lang x --period y",
+			Flags:       flags,
+			Action: func(c *cli.Context) error {
+				paramsErr := CheckParams(lang, period)
+				if paramsErr != nil {
+					return paramsErr
+				}
+
+				devs, err := FetchTrendingDevelopers(lang, period)
+				if err != nil {
+					return err
+				}
+
+				ShowTableOfDevelopers(devs)
+
+				return nil
+			},
+		},
+		{
+			Name:    "lang",
+			Aliases: []string{"l", "languages", "language"},
+			Usage:   "List all the available language options",
+			Action: func(c *cli.Context) error {
+				langs, err := ReadLanguages()
+				if err != nil {
+					return err
+				}
+
+				ShowTableOfLanguages(langs)
+
+				return nil
+			},
+		},
+	}
+	err := app.Run(os.Args)
+	if err != nil {
+		fmt.Print("☹️ command error: " + err.Error())
+	}
 }
 
 // Receive an array of trending repositories.
@@ -122,4 +195,23 @@ func ShowTableOfLanguages(languages []Language) {
 	}
 
 	table.Render()
+}
+
+func CheckParams(l, p string) error {
+	if p != "daily" && p != "weekly" && p != "monthly" {
+		return errors.New("Unknown period value: " + p)
+	}
+
+	langs, err := ReadLanguages()
+	if err != nil {
+		return err
+	}
+
+	for _, lang := range langs {
+		if lang.UrlParam == l {
+			return nil
+		}
+	}
+
+	return errors.New("Unknown lang value: " + l)
 }
