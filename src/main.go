@@ -3,13 +3,30 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/olekukonko/tablewriter"
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strconv"
 )
 
 func main() {
+	//resp, err := FetchTrendingRepositories("kotlin", "daily")
+	//if err != nil {
+	//	fmt.Println("error: " + err.Error())
+	//
+	//	return
+	//}
+	//
+	//ShowTable(resp)
 
+	//resp, err := FetchTrendingDevelopers("go", "daily")
+	//if err != nil {
+	//	fmt.Println("error: " + err.Error())
+	//	return
+	//}
+	//
+	//ShowTableOfDevelopers(resp)
 }
 
 // Receive an array of trending repositories.
@@ -69,4 +86,40 @@ func ReadLanguages() ([]Language, error) {
 	}
 
 	return languages, nil
+}
+
+func ShowTableOfRepositories(repos []Repository) {
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetHeader([]string{"Rank", "Name", "Description", "Language", "Stars(Total/Period)", "Url"})
+	table.SetRowLine(true)
+
+	for index, repo := range repos {
+		table.Append([]string{strconv.Itoa(index + 1), repo.Name, repo.DisplayDescription(), repo.DisplayLanguage(), fmt.Sprintf("%d/%d", repo.Stars, repo.CurrentPeriodStars), repo.Url})
+	}
+
+	table.Render()
+}
+
+func ShowTableOfDevelopers(developers []Developer) {
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetHeader([]string{"Rank", "Name", "Repo Name/Description", "Url"})
+	table.SetRowLine(true)
+
+	for index, dev := range developers {
+		table.Append([]string{strconv.Itoa(index + 1), dev.DisplayFullName(), dev.DisplayRepoInfo(), dev.Url})
+	}
+
+	table.Render()
+}
+
+func ShowTableOfLanguages(languages []Language) {
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetHeader([]string{"Id", "Name"})
+	table.SetRowLine(true)
+
+	for _, lang := range languages {
+		table.Append([]string{lang.UrlParam, lang.Name})
+	}
+
+	table.Render()
 }
