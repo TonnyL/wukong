@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/olekukonko/tablewriter"
 	"github.com/urfave/cli"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"strconv"
@@ -85,7 +84,7 @@ func main() {
 			Aliases: []string{"l", "languages", "language"},
 			Usage:   "List all the available language options",
 			Action: func(c *cli.Context) error {
-				langs, err := ReadLanguages()
+				langs, err := FetchLanguages()
 				if err != nil {
 					return err
 				}
@@ -138,27 +137,27 @@ func FetchTrendingDevelopers(language, since string) ([]Developer, error) {
 	return developers, nil
 }
 
-// Read popular languages and all languages.
-func ReadLanguages() ([]Language, error) {
-	jsonFile, err := os.Open("./resources/languages.json")
+// cache to avoid too many requests.
+var cachedLanguages = make([]Language, 0)
+
+// Fetch all languages.
+func FetchLanguages() ([]Language, error) {
+	if len(cachedLanguages) != 0 {
+		return cachedLanguages, nil
+	}
+	resp, err := http.Get("https://raw.githubusercontent.com/TonnyL/Wukong/master/resources/languages.json")
 	if err != nil {
 		return nil, err
 	}
 
-	defer jsonFile.Close()
+	defer resp.Body.Close()
 
-	bytes, err := ioutil.ReadAll(jsonFile)
-	if err != nil {
-		return nil, err
-	}
-
-	languages := make([]Language, 0)
-	jsonErr := json.Unmarshal(bytes, &languages)
+	jsonErr := json.NewDecoder(resp.Body).Decode(&cachedLanguages)
 	if jsonErr != nil {
 		return nil, jsonErr
 	}
 
-	return languages, nil
+	return cachedLanguages, nil
 }
 
 func ShowTableOfRepositories(repos []Repository) {
@@ -202,7 +201,7 @@ func CheckParams(l, p string) error {
 		return errors.New("Unknown period value: " + p)
 	}
 
-	langs, err := ReadLanguages()
+	langs, err := FetchLanguages()
 	if err != nil {
 		return err
 	}
