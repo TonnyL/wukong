@@ -1,6 +1,6 @@
 # Wukong
 
-![Build status](https://github.com/TonnyL/Wukong/workflows/Go/badge.svg)
+[![Build status](https://github.com/TonnyL/Wukong/workflows/Go/badge.svg)](https://github.com/TonnyL/Wukong/actions?query=workflow%3ABuild)
 
 A command-line tool for browsing GitHub trending repositories and developers written by Go.
 
@@ -22,8 +22,8 @@ Or download [archives of precompiled binaries](https://github.com/TonnyL/Wukong/
 ```
 
 Parameters:
-+ `lang`: **optional**, default to an empty string("") which stands for all the languages, see [all the options](#list-all-language-options).
-+ `period` **optional**, default to `daily`, possible values: `daily`, `weekly` and `monthly`.
++ `lang`: **optional**, default to `all` which stands for all the languages, see [all the options](#list-all-language-options).
++ `period`: **optional**, default to `daily`, possible values: `daily`, `weekly` and `monthly`.
 
 ```shell script
 % wukong repo -lang go -period daily
@@ -55,8 +55,8 @@ Parameters:
 ```
 
 Parameters:
-+ `lang`: **optional**, default to an empty string("") which stands for all the languages, see [all the options](#list-all-language-options).
-+ `period` **optional**, default to `daily`, possible values: `daily`, `weekly` and `monthly`.
++ `lang`: **optional**, default to `all` which stands for all the languages, see [all the options](#list-all-language-options).
++ `period`: **optional**, default to `daily`, possible values: `daily`, `weekly` and `monthly`.
 
 ```shell script
 % wukong dev
@@ -89,7 +89,7 @@ Parameters:
 +--------------------------------+--------------------------------+
 |               ID               |              NAME              |
 +--------------------------------+--------------------------------+
-|                                | All languages                  |
+| all                            | All languages                  |
 +--------------------------------+--------------------------------+
 | 1c-enterprise                  | 1C Enterprise                  |
 +--------------------------------+--------------------------------+

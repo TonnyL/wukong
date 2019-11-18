@@ -12,42 +12,43 @@ import (
 )
 
 func main() {
-	lang := ""
-	period := "daily"
+	var lang string
+	var period string
 
 	flags := []cli.Flag{
 		cli.StringFlag{
-			Name:     "lang,l",
-			Usage:    "language, use list command to see all the available options",
-			Required: false,
+			Name:        "lang,l",
+			Usage:       "language, default to `all`, use list command to see all the available options",
+			Required:    false,
+			Destination: &lang,
 		},
 		cli.StringFlag{
-			Name:     "period,p",
-			Usage:    "Period, possible values: daily, weekly and monthly",
-			Required: false,
+			Name:        "period,p",
+			Usage:       "Period, default to `daily`, possible values: daily, weekly and monthly",
+			Required:    false,
+			Destination: &period,
 		},
 	}
 
 	app := cli.NewApp()
 	app.Name = "Wukong" // Incredible name!
 	app.Usage = "A command-line tool for browsing GitHub trending repositories&developers written by Go."
-	app.Version = "0.1.0-alpha01"
-	app.HideVersion = true
+	app.Version = "0.1.0-alpha02"
 	app.Copyright = "Wukong is under an MIT license. See the [LICENSE](https://github.com/TonnyL/Wukong/blob/master/LICENSE) for more information."
 	app.Commands = []cli.Command{
 		{
 			Name:        "repo",
 			Aliases:     []string{"r", "repositories", "repository"},
 			Description: "See the developers that the GitHub community is most excited about.",
-			Usage:       "--lang x --period y",
+			Usage:       "-lang x -period y",
 			Flags:       flags,
 			Action: func(c *cli.Context) error {
-				paramsErr := CheckParams(lang, period)
-				if paramsErr != nil {
-					return paramsErr
+				params := CheckParams(lang, period)
+				if params == nil {
+					return errors.New("🧐 Invalid params")
 				}
 
-				repos, err := FetchTrendingRepositories(lang, period)
+				repos, err := FetchTrendingRepositories(params.Lang, params.Period)
 				if err != nil {
 					return err
 				}
@@ -61,15 +62,15 @@ func main() {
 			Name:        "dev",
 			Aliases:     []string{"d", "developers", "developer"},
 			Description: "See the repositories that the GitHub community is most excited about.",
-			Usage:       "--lang x --period y",
+			Usage:       "-lang x -period y",
 			Flags:       flags,
 			Action: func(c *cli.Context) error {
-				paramsErr := CheckParams(lang, period)
-				if paramsErr != nil {
-					return paramsErr
+				params := CheckParams(lang, period)
+				if params == nil {
+					return errors.New("🧐 Invalid params")
 				}
 
-				devs, err := FetchTrendingDevelopers(lang, period)
+				devs, err := FetchTrendingDevelopers(params.Lang, params.Period)
 				if err != nil {
 					return err
 				}
@@ -137,14 +138,8 @@ func FetchTrendingDevelopers(language, since string) ([]Developer, error) {
 	return developers, nil
 }
 
-// cache to avoid too many requests.
-var cachedLanguages = make([]Language, 0)
-
 // Fetch all languages.
 func FetchLanguages() ([]Language, error) {
-	if len(cachedLanguages) != 0 {
-		return cachedLanguages, nil
-	}
 	resp, err := http.Get("https://raw.githubusercontent.com/TonnyL/Wukong/master/resources/languages.json")
 	if err != nil {
 		return nil, err
@@ -152,12 +147,14 @@ func FetchLanguages() ([]Language, error) {
 
 	defer resp.Body.Close()
 
-	jsonErr := json.NewDecoder(resp.Body).Decode(&cachedLanguages)
+	languages := make([]Language, 0)
+	jsonErr := json.NewDecoder(resp.Body).Decode(&languages)
+
 	if jsonErr != nil {
 		return nil, jsonErr
 	}
 
-	return cachedLanguages, nil
+	return languages, nil
 }
 
 func ShowTableOfRepositories(repos []Repository) {
@@ -196,21 +193,35 @@ func ShowTableOfLanguages(languages []Language) {
 	table.Render()
 }
 
-func CheckParams(l, p string) error {
-	if p != "daily" && p != "weekly" && p != "monthly" {
-		return errors.New("Unknown period value: " + p)
+func CheckParams(lang, period string) *Params {
+	if period == "" {
+		period = "daily"
 	}
 
-	langs, err := FetchLanguages()
-	if err != nil {
-		return err
+	if period != "daily" && period != "weekly" && period != "monthly" {
+		return nil
 	}
 
-	for _, lang := range langs {
-		if lang.UrlParam == l {
+	if lang == "" || lang == "all" {
+		return &Params{
+			Lang:   "",
+			Period: period,
+		}
+	} else {
+		languages, err := FetchLanguages()
+		if err != nil {
 			return nil
+		}
+
+		for _, l := range languages {
+			if l.UrlParam == lang {
+				return &Params{
+					Lang:   lang,
+					Period: period,
+				}
+			}
 		}
 	}
 
-	return errors.New("Unknown lang value: " + l)
+	return nil
 }
