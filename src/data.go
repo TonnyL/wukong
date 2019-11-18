@@ -66,6 +66,11 @@ type Language struct {
 	Name     string `json:"name"`
 }
 
+type Params struct {
+	Lang   string
+	Period string
+}
+
 func (r Repository) DisplayLanguage() string {
 	if r.Language == "" {
 		return "Unknown"
