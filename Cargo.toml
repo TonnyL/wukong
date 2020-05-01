@@ -1,0 +1,19 @@
+[package]
+name = "wukong"
+version = "0.1.0"
+authors = ["tonnyl <lizhaotailang@gmail.com>"]
+edition = "2018"
+homepage = "https://github.com/TonnyL/wukong"
+repository = "https://github.com/TonnyL/wukong"
+categories = ["command-line-utilities"]
+readme = "README.md"
+keywords = ["prompt", "shell", "bash", "fish", "zsh"]
+license = "MIT/Apache-2.0"
+description = "A command-line tool for browsing GitHub trending"
+
+[dependencies]
+
+[[bin]]
+bench = false
+path = "src/main.rs"
+name = "wukong"
