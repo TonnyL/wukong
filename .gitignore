@@ -1,3 +1,8 @@
 .idea
 bin
 .DS_Store
+
+#Added by cargo
+
+/target
+wukong.iml
