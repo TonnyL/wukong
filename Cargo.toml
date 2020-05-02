@@ -12,6 +12,8 @@ license = "MIT/Apache-2.0"
 description = "A command-line tool for browsing GitHub trending"
 
 [dependencies]
+serde_json = "1.0.52"
+serde = { version = "1.0.106", features = ["derive"] }
 
 [[bin]]
 bench = false
