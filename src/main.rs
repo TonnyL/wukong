@@ -1,9 +1,12 @@
 #[macro_use]
+extern crate clap;
+#[macro_use]
 extern crate prettytable;
 
 use std::borrow::Cow;
 use std::error::Error;
 
+use clap::{App, AppSettings, Arg};
 use prettytable::{Cell, Row, Table};
 use serde::Deserialize;
 
@@ -39,7 +42,123 @@ struct Language {
 }
 
 fn main() {
-    println!("Hello, world!");
+    let matches = App::new("wukong")
+        .setting(AppSettings::SubcommandRequiredElseHelp)
+        .about("A command-line tool for browsing GitHub trending written by Rust.")
+        .version(crate_version!())
+        .author(crate_authors!())
+        .after_help("https://github.com/TonnyL/wukong/")
+        .subcommand(
+            App::new("repos")
+                .about("See the developers that the GitHub community is most excited about")
+                .aliases(&vec!["r", "repositories", "repository"])
+                .args(&[
+                    Arg::with_name("lang")
+                        .short('l')
+                        .long("lang")
+                        .takes_value(true)
+                        .required(false)
+                        .about("filter by programming language"),
+                    Arg::with_name("period")
+                        .short('p')
+                        .long("period")
+                        .takes_value(true)
+                        .required(false)
+                        .about("filter by time period"),
+                    Arg::with_name("spoken_lang")
+                        .short('s')
+                        .long("spoken_language")
+                        .takes_value(true)
+                        .required(false)
+                        .about("filter by spoken language")
+                ])
+        )
+        .subcommand(
+            App::new("devs")
+                .about("These are the developers building the hot tools today")
+                .aliases(&vec!["d", "developers", "developer"])
+                .args(&[
+                    Arg::with_name("lang")
+                        .short('l')
+                        .long("language")
+                        .takes_value(true)
+                        .required(false)
+                        .about("filter by programming language"),
+                    Arg::with_name("period")
+                        .short('p')
+                        .long("period")
+                        .takes_value(true)
+                        .required(false)
+                        .about("filter by time period"),
+                ]),
+        )
+        .subcommand(
+            App::new("langs")
+                .about("List all the available programming language options")
+                .aliases(&vec!["l", "languages", "language"]),
+        )
+        .subcommand(
+            App::new("spoken_langs")
+                .about("List all the available spoken language options")
+                .aliases(&vec!["sl", "spoken-languages", "spoken-language", "spoken-lang"]),
+        )
+        .get_matches();
+
+    match matches.subcommand() {
+        ("langs", _) => {
+            let result = list_languages();
+            match result {
+                Ok(value) => {
+                    show_table_of_languages(value);
+                }
+                Err(e) => {
+                    print_err_msg(e)
+                }
+            }
+        }
+        ("spoken_langs", _) => {
+            let result = list_spoken_language_codes();
+            match result {
+                Ok(value) => {
+                    show_table_of_languages(value);
+                }
+                Err(e) => {
+                    print_err_msg(e)
+                }
+            }
+        }
+        ("repos", Some(sub_m)) => {
+            let result = list_repositories(
+                sub_m.value_of("lang").unwrap_or("").to_string(),
+                sub_m.value_of("period").unwrap_or("daily").to_string(),
+                sub_m.value_of("spoken_lang").unwrap_or("").to_string(),
+            );
+            match result {
+                Ok(value) => {
+                    show_table_of_repositories(value);
+                }
+                Err(e) => {
+                    print_err_msg(e)
+                }
+            }
+        }
+        ("devs", Some(sub_m)) => {
+            let result = list_developers(
+                sub_m.value_of("lang").unwrap_or("").to_string(),
+                sub_m.value_of("period").unwrap_or("daily").to_string(),
+            );
+
+            match result {
+                Ok(value) => {
+                    show_table_of_developers(value);
+                }
+                Err(e) => {
+                    print_err_msg(e)
+                }
+            }
+        }
+        _ => {}
+    }
 }
 
 /// Display the languages data as a table.
