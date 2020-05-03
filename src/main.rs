@@ -2,6 +2,7 @@
 extern crate prettytable;
 
 use std::borrow::Cow;
+use std::error::Error;
 
 use prettytable::{Cell, Row, Table};
 use serde::Deserialize;
@@ -118,4 +119,49 @@ fn limit_string_with_break_lines(input: &str) -> String {
     }
 
     result
+}
+
+/// Receive an array of all options of certain programming languages(e.g. Rust, Golang).
+fn list_languages() -> Result<Vec<Language>, Box<dyn Error>> {
+    let resp = reqwest::blocking::get("https://raw.githubusercontent.com/huchenme/github-trending-api/master/src/languages.json")?
+        .json::<Vec<Language>>()?;
+    Ok(resp)
+}
+
+/// Receive an array of all options of certain spoken languages(e.g. Chinese, English)
+fn list_spoken_language_codes() -> Result<Vec<Language>, Box<dyn Error>> {
+    let resp = reqwest::blocking::get("https://raw.githubusercontent.com/huchenme/github-trending-api/master/src/spoken-languages.json")?
+        .json::<Vec<Language>>()?;
+    Ok(resp)
+}
+
+/// Receive an array of trending repositories.
+///
+/// # Arguments
+///
+/// * `lang` - Optional, list trending repositories of certain programming languages
+/// * `period` - Optional, default to `daily`, possible values: `daily`, `weekly` and `monthly`
+/// * `spoken_lang_code` - optional, list trending repositories of certain spoken languages (e.g English, Chinese)
+///
+fn list_repositories(lang: String, period: String, spoken_lang_code: String) -> Result<Vec<Repository>, Box<dyn Error>> {
+    let resp = reqwest::blocking::get(&format!("https://github-trending-api.now.sh/repositories?language={}&since={}&spoken_language_code={}", lang, period, spoken_lang_code))?
+        .json::<Vec<Repository>>()?;
+    Ok(resp)
+}
+
+/// Receive an array of trending developers.
+///
+/// # Arguments
+///
+/// * `lang` - Optional, list trending repositories of certain programming languages
+/// * `period` - Optional, default to `daily`, possible values: `daily`, `weekly` and `monthly`
+///
+fn list_developers(lang: String, period: String) -> Result<Vec<Developer>, Box<dyn Error>> {
+    let resp = reqwest::blocking::get(&format!("https://github-trending-api.now.sh/developers?language={}&since={}", lang, period))?
+        .json::<Vec<Developer>>()?;
+    Ok(resp)
+}
+
+fn print_err_msg(err: Box<dyn Error>) {
+    eprintln!("wukong got an error: {}", err)
 }
