@@ -1,8 +1,8 @@
 # Wukong
 
-[![Build status](https://github.com/TonnyL/Wukong/workflows/Go/badge.svg)](https://github.com/TonnyL/Wukong/actions?query=workflow%3ABuild)
+[![Build status](https://github.com/TonnyL/Wukong/workflows/Build/badge.svg)](https://github.com/TonnyL/Wukong/actions?query=workflow%3ABuild)
 
-A command-line tool for browsing GitHub trending repositories and developers written by Go.
+A command-line tool for browsing GitHub trending written by Rust.
 
 > The Monkey King, known as Sun Wukong in Chinese, is a legendary figure best known as one of the main characters in the 16th-century Chinese novel Journey to the West (西游记/西遊記) and many later stories and adaptations.
 > 
@@ -18,85 +18,110 @@ Or download [archives of precompiled binaries](https://github.com/TonnyL/Wukong/
 ## Usage
 ### Find trending repositories
 ```shell script
-% wukong repo -lang x -period y
+% wukong repos --lang x --period y --spoken_lang z
+% wukong repos -l x -p y -s z
 ```
 
 Parameters:
-+ `lang`: **optional**, default to `all` which stands for all the languages, see [all the options](#list-all-language-options).
++ `lang`: **optional**, default to `all` which stands for all the languages, see [all the options](#list-all-programming-language-options).
 + `period`: **optional**, default to `daily`, possible values: `daily`, `weekly` and `monthly`.
++ `spoken_lang`: **optional**, list trending repositories of certain spoken languages (e.g English, Chinese), see [all the options](#list-all-spoken-language-options).
 
 ```shell script
-% wukong repo -lang go -period daily
+% wukong repos --lang rust --period daily
 
-+------+----------------------------+--------------------------+----------+---------------------+-------------------------------------------------------------------+
-| RANK |            NAME            |       DESCRIPTION        | LANGUAGE | STARS(TOTAL/PERIOD) |                                URL                                |
-+------+----------------------------+--------------------------+----------+---------------------+-------------------------------------------------------------------+
-|    1 | OpenDiablo2                | An open source re-implem | Go       | 2626/1625           | https://github.com/OpenDiablo2/OpenDiablo2                        |
-|      |                            | entation of Diablo 2     |          |                     |                                                                   |
-+------+----------------------------+--------------------------+----------+---------------------+-------------------------------------------------------------------+
-|    2 | validator                  | 💯Go Struct and Field    | Go       | 4154/149            | https://github.com/go-playground/validator                        |
-|      |                            | validation, including Cr |          |                     |                                                                   |
-|      |                            | oss Field, Cross Struct, |          |                     |                                                                   |
-|      |                            |  Map, Slice and Array di |          |                     |                                                                   |
-|      |                            | ving                     |          |                     |                                                                   |
-+------+----------------------------+--------------------------+----------+---------------------+-------------------------------------------------------------------+
-|    4 | grpc-go                    | The Go language implemen | Go       | 10019/58            | https://github.com/grpc/grpc-go                                   |
-|      |                            | tation of gRPC. HTTP/2 b |          |                     |                                                                   |
-|      |                            | ased RPC                 |          |                     |                                                                   |
-+------+----------------------------+--------------------------+----------+---------------------+-------------------------------------------------------------------+
-|    . | ...                        | ...                      | ...      |  ...                | ...                                                               |
-+------+----------------------------+--------------------------+----------+---------------------+-------------------------------------------------------------------+
-
++------+---------------------+--------------------------+----------+---------------------+
+| Rank | Full Name           | Description              | Language | Stars(Total/Period) |
++------+---------------------+--------------------------+----------+---------------------+
+| 1    | diesel-rs/diesel    | A safe, extensible ORM a | Rust     | 5368/5              |
+|      |                     | nd Query Builder for Rus |          |                     |
+|      |                     | t                        |          |                     |
++------+---------------------+--------------------------+----------+---------------------+
+| 2    | 996icu/996.ICU      | Repo for counting stars  | Rust     | 249376/24           |
+|      |                     | and contributing. Press  |          |                     |
+|      |                     | F to pay respect to glor |          |                     |
+|      |                     | ious developers.         |          |                     |
++------+---------------------+--------------------------+----------+---------------------+
+| 3    | Rust-SDL2/rust-sdl2 | SDL2 bindings for Rust   | Rust     | 1271/1              |
++------+---------------------+--------------------------+----------+---------------------+
+| ...  | ...                 | ...                      | ...      | ...                 |
++------+---------------------+--------------------------+----------+---------------------+
 ```
 
 ### Find trending developers
 ```shell script
-% wukong dev -lang x -period y
+% wukong devs --lang x --period y
+% wukong devs -l x -p y
 ```
 
 Parameters:
-+ `lang`: **optional**, default to `all` which stands for all the languages, see [all the options](#list-all-language-options).
++ `lang`: **optional**, default to `all` which stands for all the languages, see [all the options](#list-all-programming-language-options).
 + `period`: **optional**, default to `daily`, possible values: `daily`, `weekly` and `monthly`.
 
 ```shell script
-% wukong dev
+% wukong devs
 
-+------+------------------------------+--------------------------+----------------------------------+
-| RANK |             NAME             |  REPO NAME/DESCRIPTION   |               URL                |
-+------+------------------------------+--------------------------+----------------------------------+
-|    1 | Alon Zakai(kripken)          | sql.js - SQLite compiled | https://github.com/kripken       |
-|      |                              |  to JavaScript through E |                                  |
-|      |                              | mscripten                |                                  |
-+------+------------------------------+--------------------------+----------------------------------+
-|    2 | Klaus Post(klauspost)        | compress - Optimized com | https://github.com/klauspost     |
-|      |                              | pression packages        |                                  |
-+------+------------------------------+--------------------------+----------------------------------+
-|    3 | siddontang(siddontang)       | ledisdb - a high perform | https://github.com/siddontang    |
-|      |                              | ance NoSQL powered by Go |                                  |
-+------+------------------------------+--------------------------+----------------------------------+
-|    . | ...                          | ...                      | ...                              |
-+------+------------------------------+--------------------------+----------------------------------+
++------+---------------------------------+----------------+--------------------------+
+| Rank | Name                            | Repo Name      | Description              |
++------+---------------------------------+----------------+--------------------------+
+| 1    | Tim Paine(timkpaine)            | algo-coin      | Python library for algor |
+|      |                                 |                | ithmic trading cryptocur |
+|      |                                 |                | rencies across multiple  |
+|      |                                 |                | exchanges                |
++------+---------------------------------+----------------+--------------------------+
+| 2    | Kyle Mathews(KyleAMathews)      | typography.js  | A powerful toolkit for b |
+|      |                                 |                | uilding websites with be |
+|      |                                 |                | autiful design           |
++------+---------------------------------+----------------+--------------------------+
+| 3    | XhmikosR(XhmikosR)              | notepad2-mod   | LOOKING FOR DEVELOPERS - |
+|      |                                 |                |  Notepad2-mod, a Notepad |
+|      |                                 |                | 2 fork, a fast and light |
+|      |                                 |                | -weight Notepad-like tex |
+|      |                                 |                | t editor with syntax hig |
+|      |                                 |                | hlighting                |
++------+---------------------------------+----------------+--------------------------+
+| 4    | Forbes Lindesay(ForbesLindesay) | redux-optimist | Optimistically apply act |
+|      |                                 |                | ions that can be later c |
+|      |                                 |                | ommited or reverted.     |
++------+---------------------------------+----------------+--------------------------+
+| 5    | ...                             | ...            | ...                      |
++------+---------------------------------+----------------+--------------------------+
 ```
 
-### List all language options
+### List all programming language options
 ```shell script
-% wukong lang
+% wukong langs
+
++-------------------+-------------------+
+| name              | value             |
++-------------------+-------------------+
+| 1C Enterprise     | 1c-enterprise     |
++-------------------+-------------------+
+| ABAP              | abap              |
++-------------------+-------------------+
+| ABNF              | abnf              |
++-------------------+-------------------+   
+| ...               | ...               |  
++-------------------+-------------------+  
 ```
 
+### List all spoken language options
 ```shell script
-% wukong lang
+% wukong spoken_langs
 
-+--------------------------------+--------------------------------+
-|               ID               |              NAME              |
-+--------------------------------+--------------------------------+
-| all                            | All languages                  |
-+--------------------------------+--------------------------------+
-| 1c-enterprise                  | 1C Enterprise                  |
-+--------------------------------+--------------------------------+
-| abap                           | ABAP                           |
-+--------------------------------+--------------------------------+
-| ...                            | ...                            |
-+--------------------------------+--------------------------------+
++-----------------+-------+
+| name            | value |
++-----------------+-------+
+| Abkhazian       | ab    |
++-----------------+-------+
+| Afar            | aa    |
++-----------------+-------+
+| Afrikaans       | af    |
++-----------------+-------+
+| Akan            | ak    |
++-----------------+-------+
+| ...             | ...   |
++-----------------+-------+
 ```
 
 ## License
