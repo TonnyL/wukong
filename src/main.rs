@@ -51,7 +51,7 @@ fn main() {
         .subcommand(
             App::new("repos")
                 .about("See the developers that the GitHub community is most excited about")
-                .aliases(&vec!["r", "repositories", "repository"])
+                .aliases(&["r", "repositories", "repository"])
                 .args(&[
                     Arg::with_name("lang")
                         .short('l')
@@ -70,13 +70,13 @@ fn main() {
                         .long("spoken_language")
                         .takes_value(true)
                         .required(false)
-                        .about("filter by spoken language")
-                ])
+                        .about("filter by spoken language"),
+                ]),
         )
         .subcommand(
             App::new("devs")
                 .about("These are the developers building the hot tools today")
-                .aliases(&vec!["d", "developers", "developer"])
+                .aliases(&["d", "developers", "developer"])
                 .args(&[
                     Arg::with_name("lang")
                         .short('l')
@@ -95,12 +95,12 @@ fn main() {
         .subcommand(
             App::new("langs")
                 .about("List all the available programming language options")
-                .aliases(&vec!["l", "languages", "language"]),
+                .aliases(&["l", "languages", "language"]),
         )
         .subcommand(
             App::new("spoken_langs")
                 .about("List all the available spoken language options")
-                .aliases(&vec!["sl", "spoken-languages", "spoken-language", "spoken-lang"]),
+                .aliases(&["sl", "spoken-languages", "spoken-language", "spoken-lang"]),
         )
         .get_matches();
 
@@ -111,9 +111,7 @@ fn main() {
                 Ok(value) => {
                     show_table_of_languages(value);
                 }
-                Err(e) => {
-                    print_err_msg(e)
-                }
+                Err(e) => print_err_msg(e),
             }
         }
         ("spoken_langs", _) => {
@@ -122,9 +120,7 @@ fn main() {
                 Ok(value) => {
                     show_table_of_languages(value);
                 }
-                Err(e) => {
-                    print_err_msg(e)
-                }
+                Err(e) => print_err_msg(e),
             }
         }
         ("repos", Some(sub_m)) => {
@@ -137,9 +133,7 @@ fn main() {
                 Ok(value) => {
                     show_table_of_repositories(value);
                 }
-                Err(e) => {
-                    print_err_msg(e)
-                }
+                Err(e) => print_err_msg(e),
             }
         }
         ("devs", Some(sub_m)) => {
@@ -152,9 +146,7 @@ fn main() {
                 Ok(value) => {
                     show_table_of_developers(value);
                 }
-                Err(e) => {
-                    print_err_msg(e)
-                }
+                Err(e) => print_err_msg(e),
             }
         }
         _ => {}
@@ -201,7 +193,13 @@ fn show_table_of_developers(developers: Vec<Developer>) {
 /// Display the repositories data as a table.
 fn show_table_of_repositories(repositories: Vec<Repository>) {
     let mut table = Table::new();
-    table.add_row(row!["Rank", "Full Name", "Description", "Language", "Stars(Total/Period)"]);
+    table.add_row(row![
+        "Rank",
+        "Full Name",
+        "Description",
+        "Language",
+        "Stars(Total/Period)"
+    ]);
     for (index, repository) in repositories.iter().enumerate() {
         let language = match &repository.language {
             Some(v) => v,
@@ -212,7 +210,10 @@ fn show_table_of_repositories(repositories: Vec<Repository>) {
             Cell::new(&format!("{}/{}", repository.author, repository.name)),
             Cell::new(&limit_string_with_break_lines(&repository.description)),
             Cell::new(language),
-            Cell::new(&format!("{}/{}", repository.stars, repository.current_period_stars)),
+            Cell::new(&format!(
+                "{}/{}",
+                repository.stars, repository.current_period_stars
+            )),
         ]));
     }
     println!("\n");
@@ -242,15 +243,18 @@ fn limit_string_with_break_lines(input: &str) -> String {
 
 /// Receive an array of all options of certain programming languages(e.g. Rust, Golang).
 fn list_languages() -> Result<Vec<Language>, Box<dyn Error>> {
-    let resp = reqwest::blocking::get("https://raw.githubusercontent.com/huchenme/github-trending-api/master/src/languages.json")?
-        .json::<Vec<Language>>()?;
+    let resp = reqwest::blocking::get(
+        "https://raw.githubusercontent.com/huchenme/github-trending-api/master/src/languages.json",
+    )?
+    .json::<Vec<Language>>()?;
     Ok(resp)
 }
 
 /// Receive an array of all options of certain spoken languages(e.g. Chinese, English)
 fn list_spoken_language_codes() -> Result<Vec<Language>, Box<dyn Error>> {
-    let resp = reqwest::blocking::get("https://raw.githubusercontent.com/huchenme/github-trending-api/master/src/spoken-languages.json")?
-        .json::<Vec<Language>>()?;
+    let resp = reqwest::blocking::get(
+        "https://raw.githubusercontent.com/huchenme/github-trending-api/master/src/spoken-languages.json"
+    )?.json::<Vec<Language>>()?;
     Ok(resp)
 }
 
@@ -262,9 +266,16 @@ fn list_spoken_language_codes() -> Result<Vec<Language>, Box<dyn Error>> {
 /// * `period` - Optional, default to `daily`, possible values: `daily`, `weekly` and `monthly`
 /// * `spoken_lang_code` - optional, list trending repositories of certain spoken languages (e.g English, Chinese)
 ///
-fn list_repositories(lang: String, period: String, spoken_lang_code: String) -> Result<Vec<Repository>, Box<dyn Error>> {
-    let resp = reqwest::blocking::get(&format!("https://github-trending-api.now.sh/repositories?language={}&since={}&spoken_language_code={}", lang, period, spoken_lang_code))?
-        .json::<Vec<Repository>>()?;
+fn list_repositories(
+    lang: String,
+    period: String,
+    spoken_lang_code: String,
+) -> Result<Vec<Repository>, Box<dyn Error>> {
+    let resp = reqwest::blocking::get(&format!(
+        "https://github-trending-api.now.sh/repositories?language={}&since={}&spoken_language_code={}", 
+        lang, period, spoken_lang_code
+    ))?
+    .json::<Vec<Repository>>()?;
     Ok(resp)
 }
 
@@ -276,8 +287,11 @@ fn list_repositories(lang: String, period: String, spoken_lang_code: String) -> 
 /// * `period` - Optional, default to `daily`, possible values: `daily`, `weekly` and `monthly`
 ///
 fn list_developers(lang: String, period: String) -> Result<Vec<Developer>, Box<dyn Error>> {
-    let resp = reqwest::blocking::get(&format!("https://github-trending-api.now.sh/developers?language={}&since={}", lang, period))?
-        .json::<Vec<Developer>>()?;
+    let resp = reqwest::blocking::get(&format!(
+        "https://github-trending-api.now.sh/developers?language={}&since={}",
+        lang, period
+    ))?
+    .json::<Vec<Developer>>()?;
     Ok(resp)
 }
 
