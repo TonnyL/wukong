@@ -8,6 +8,11 @@ A command-line tool for browsing GitHub trending written by Rust.
 > 
 >https://en.wikipedia.org/wiki/Monkey_King
 
+## Build
+```shell
+./scripts/run.sh
+```
+
 ## Installation
 Install the **Wukong** binary via **Homebrew**:
 ```shell script
